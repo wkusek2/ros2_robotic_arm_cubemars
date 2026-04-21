@@ -1,0 +1,300 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="arm6dof">
+    <link name="world"/>
+
+    <joint name="world_to_base" type="fixed">
+        <parent link="world"/>
+        <child link="jedziemy_dalej_V2_Obudowa_podstawa-v11-v1"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <link name="Silnik_ak45-36-v1">
+        <inertial>
+            <origin xyz="0.003580379446193227 5.406745075496171e-14 0.04092390119448847" rpy="0.0 -0.0 0.0" />
+            <mass value="0.41683812668748693" />
+            <inertia ixx="0.0001596718423631377" iyy="0.00016041758536708417" izz="6.298914759078449e-05" ixy="-1.0059454821655886e-18" iyz="-1.1753999951775428e-17" ixz="-8.523883825948129e-06" />
+        </inertial>
+        <visual name="Silnik_ak45-36-v1_visual">
+            <origin xyz="0.003050453025397868 5.337498401704634e-14 0.034866814490128" rpy="-1.2136222858187365e-13 0.08726646259971599 -1.0000285373388856e-14" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/Silnik_ak45-36-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="Silnik_ak45-36-v1_collision">
+            <origin xyz="0.003050453025397868 5.337498401704634e-14 0.034866814490128" rpy="-1.2136222858187365e-13 0.08726646259971599 -1.0000285373388856e-14" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/Silnik_ak45-36-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_Obudowa_podstawa-v11-v1">
+        <inertial>
+            <origin xyz="2.471665912677848e-07 0.0032741555763765 0.014476011172937737" rpy="0.0 0.0 0.0" />
+            <mass value="0.45097504935689353" />
+            <inertia ixx="0.0011045045572738714" iyy="0.0010560043800969792" izz="0.0005942744180107535" ixy="-1.1961935170963945e-10" iyz="2.0893202204241118e-05" ixz="5.52168309819333e-09" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_Obudowa_podstawa-v11-v1_visual">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Obudowa_podstawa-v11-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_Obudowa_podstawa-v11-v1_collision">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Obudowa_podstawa-v11-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="wyjscie_podstawa-v1">
+        <inertial>
+            <origin xyz="-0.007191918295976691 0.0017451314732682378 0.08340251930657093" rpy="0.0 -0.0 0.0" />
+            <mass value="0.5337084968673121" />
+            <inertia ixx="0.001365378966283453" iyy="0.0011271288576293961" izz="0.0008234185615442948" ixy="-3.9309111973658765e-07" iyz="-2.5356254302744965e-05" ixz="4.685015929818161e-05" />
+        </inertial>
+        <visual name="wyjscie_podstawa-v1_visual">
+            <origin xyz="-0.011496597303514164 -0.2575499984801143 0.13197911921705802" rpy="1.2165799188215818e-13 0.08726646259971646 -3.1415926535897833" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/wyjscie_podstawa-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="wyjscie_podstawa-v1_collision">
+            <origin xyz="-0.011496597303514164 -0.2575499984801143 0.13197911921705802" rpy="1.2165799188215818e-13 0.08726646259971646 -3.1415926535897833" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/wyjscie_podstawa-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="silnik60-v1">
+        <inertial>
+            <origin xyz="1.8495017073405507e-09 -4.334650220982894e-09 0.030465794657075565" rpy="0.0 -0.0 0.0" />
+            <mass value="0.832000556903433" />
+            <inertia ixx="0.00034640030869088206" iyy="0.00034640030868888973" izz="0.0005855795083725968" ixy="-1.7694179454963455e-16" iyz="3.972285346277488e-16" ixz="6.1582683397176e-17" />
+        </inertial>
+        <visual name="silnik60-v1_visual">
+            <origin xyz="-0.014825189168012792 -0.16945272255215543 0.03379999848006464" rpy="-1.658062789394613 -1.5707963267947829 0" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/silnik60-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="silnik60-v1_collision">
+            <origin xyz="-0.014825189168012792 -0.16945272255215543 0.03379999848006464" rpy="-1.658062789394613 -1.5707963267947829 0" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/silnik60-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1">
+        <inertial>
+            <origin xyz="-0.14928721628295327 -0.05224952167105884 0.013059017101912086" rpy="0.0 -0.0 0.0" />
+            <mass value="0.8177528117001724" />
+            <inertia ixx="0.0009834893122915855" iyy="0.0042632648765358085" izz="0.0044936841285563005" ixy="-4.325151590830977e-05" iyz="2.1575499105728883e-06" ixz="0.00031319160742792175" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1_visual">
+            <origin xyz="0.06755468522974517 0.0616000000000441 0.08373084013822489" rpy="1.4835298641951804 3.310614754159522e-15 -1.570796326794779" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1_collision">
+            <origin xyz="0.06755468522974517 0.0616000000000441 0.08373084013822489" rpy="1.4835298641951804 3.310614754159522e-15 -1.570796326794779" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1">
+        <inertial>
+            <origin xyz="2.1240247161102843e-09 0.04108021962528416 -3.7123828278140536e-09" rpy="0.0 -0.0 0.0" />
+            <mass value="0.4168381266874869" />
+            <inertia ixx="0.00016041758556541727" iyy="6.224340438697792e-05" izz="0.00016041758536859858" ixy="2.0086471548552765e-15" iyz="-1.752445545492444e-16" ixz="-1.7351861318098122e-14" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1_visual">
+            <origin xyz="2.1238577385673807e-09 0.02499999583371225 -3.7123680751705025e-09" rpy="1.570796326794901 0.08726646259971611 1.2148404276792067e-13" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1_collision">
+            <origin xyz="2.1238577385673807e-09 0.02499999583371225 -3.7123680751705025e-09" rpy="1.570796326794901 0.08726646259971611 1.2148404276792067e-13" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1">
+        <inertial>
+            <origin xyz="0.0035429149450254905 -0.04049572393485256 1.3297558110192399e-09" rpy="0.0 -0.0 0.0" />
+            <mass value="0.4192142851894471" />
+            <inertia ixx="0.00016334542340003255" iyy="6.297161364714481e-05" izz="0.00016411963707958777" ixy="8.849305406149165e-06" iyz="1.5707378973883745e-16" ixz="-1.3742262536253769e-17" />
+        </inertial>
+        <visual name="Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1_visual">
+            <origin xyz="0.00521191170660039 -0.059572444214703424 1.3297689743785313e-09" rpy="-1.5707963267950176 6.687500211728214e-15 0.08726646259971646" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1_collision">
+            <origin xyz="0.00521191170660039 -0.059572444214703424 1.3297689743785313e-09" rpy="-1.5707963267950176 6.687500211728214e-15 0.08726646259971646" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_Obrót-pózniej-v5-v1">
+        <inertial>
+            <origin xyz="-0.0046158587778199235 -0.0011095045862415448 -0.051933778126588205" rpy="0.0 -0.0 0.0" />
+            <mass value="0.32878531940648154" />
+            <inertia ixx="0.000509832899061511" iyy="0.0004038297217688336" izz="0.0003372019176561922" ixy="1.7348225850772502e-07" iyz="-1.0277384035525924e-05" ixz="-1.5994832759011132e-05" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_Obrót-pózniej-v5-v1_visual">
+            <origin xyz="-0.010075962435666367 0.00754999980982846 -0.11574114442623273" rpy="-3.141592653589672 -0.08726646259971646 3.1415926535897865" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Obrót-pózniej-v5-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_Obrót-pózniej-v5-v1_collision">
+            <origin xyz="-0.010075962435666367 0.00754999980982846 -0.11574114442623273" rpy="-3.141592653589672 -0.08726646259971646 3.1415926535897865" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Obrót-pózniej-v5-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_Komponent98-v1">
+        <inertial>
+            <origin xyz="-0.007566279995924292 0.05135006757190421 -0.08807751210315004" rpy="0.0 -0.0 0.0" />
+            <mass value="0.3053908468979247" />
+            <inertia ixx="0.0008056737865500107" iyy="0.0006986117839719048" izz="0.0003737065384801923" ixy="5.44375166488086e-07" iyz="5.261648555922213e-06" ixz="-3.722509979493284e-05" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_Komponent98-v1_visual">
+            <origin xyz="-0.0104897036537713 0.05128649132976626 -0.12245172543197906" rpy="1.5707963267950182 -0.0872664625997162 3.1415926535897865" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Komponent98-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_Komponent98-v1_collision">
+            <origin xyz="-0.0104897036537713 0.05128649132976626 -0.12245172543197906" rpy="1.5707963267950182 -0.0872664625997162 3.1415926535897865" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Komponent98-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_silnik_ak45-10-v1">
+        <inertial>
+            <origin xyz="3.4273072380130997e-10 1.3841049906204716e-09 0.028604161845095226" rpy="0.0 -0.0 0.0" />
+            <mass value="0.3323674270148887" />
+            <inertia ixx="7.296632840646244e-05" iyy="7.296632840774278e-05" izz="8.75986515185348e-05" ixy="-1.1969591984239966e-16" iyz="3.941048055676882e-17" ixz="-5.20537290375787e-18" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_silnik_ak45-10-v1_visual">
+            <origin xyz="0.645624326954073 0.04934544478131574 0.020169594045718397" rpy="0.08726646259971632 -1.5707963267947829 0" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_silnik_ak45-10-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_silnik_ak45-10-v1_collision">
+            <origin xyz="0.645624326954073 0.04934544478131574 0.020169594045718397" rpy="0.08726646259971632 -1.5707963267947829 0" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_silnik_ak45-10-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_Komponent98-Kopiuj-v1">
+        <inertial>
+            <origin xyz="0.07365746358145224 0.012687811439143602 0.04794738442370318" rpy="0.0 -0.0 0.0" />
+            <mass value="0.29460800887883326" />
+            <inertia ixx="0.00040040959872039705" iyy="0.00040577634423346384" izz="0.0004474525637582702" ixy="-6.379315144444338e-06" iyz="1.0811119801610974e-06" ixz="2.7359489795726424e-06" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_Komponent98-Kopiuj-v1_visual">
+            <origin xyz="0.09312353433404426 0.0026086896217353585 0.047950207200446696" rpy="-1.1353778868109705e-13 -6.5913539911443344e-15 -0.08726646259971657" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Komponent98-Kopiuj-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_Komponent98-Kopiuj-v1_collision">
+            <origin xyz="0.09312353433404426 0.0026086896217353585 0.047950207200446696" rpy="-1.1353778868109705e-13 -6.5913539911443344e-15 -0.08726646259971657" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_Komponent98-Kopiuj-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="jedziemy_dalej_V2_silnik_ak45-10-Kopiuj-v1">
+        <inertial>
+            <origin xyz="0.0006150751617115268 -0.007030380133527175 2.7995666440627786e-09" rpy="0.0 -0.0 0.0" />
+            <mass value="0.5402493377389448" />
+            <inertia ixx="0.0005552695009332642" iyy="0.00013221837533821008" izz="0.0005205551135322728" ixy="3.729766383056901e-05" iyz="5.345116710353537e-17" ixz="1.6263032587282567e-18" />
+        </inertial>
+        <visual name="jedziemy_dalej_V2_silnik_ak45-10-Kopiuj-v1_visual">
+            <origin xyz="0.6489814058411396 0.010973813352139886 0.007112201434090681" rpy="-1.5707963267949976 1.1724678376479107e-13 1.6580627893946132" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_silnik_ak45-10-Kopiuj-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision name="jedziemy_dalej_V2_silnik_ak45-10-Kopiuj-v1_collision">
+            <origin xyz="0.6489814058411396 0.010973813352139886 0.007112201434090681" rpy="-1.5707963267949976 1.1724678376479107e-13 1.6580627893946132" />
+            <geometry>
+                <mesh filename="package://arm6dof/urdf/meshes/jedziemy_dalej_V2_silnik_ak45-10-Kopiuj-v1.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+    </link>
+    <joint name="jedziemy_dalej_V2_Obudowa_podstawa-v11-v1_joint1" type="continuous">
+        <origin xyz="2.0165472403022023e-09 -4.9131935433459895e-14 0.06000000023355941" rpy="-3.141592653589672 0.08726646259971646 -3.141592653589792" />
+        <parent link="jedziemy_dalej_V2_Obudowa_podstawa-v11-v1" />
+        <child link="Silnik_ak45-36-v1" />
+        <axis xyz="-0.087156 3.041496221545257e-16 -0.996195" />
+    </joint>
+    <joint name="Silnik_ak45-36-v1_Sztywne-2" type="fixed">
+        <origin xyz="-1.7430000000011602e-05 6.083022974223082e-20 -0.0001992399999999961" rpy="-3.141592653589793 -0.0 0.0" />
+        <parent link="Silnik_ak45-36-v1" />
+        <child link="wyjscie_podstawa-v1" />
+    </joint>
+    <joint name="silnik60-v1_joint2" type="continuous">
+        <origin xyz="0.0 0.0 0.00019999999999999575" rpy="-1.5707963267948966 -3.7231628423627605e-15 1.5707963267948966" />
+        <parent link="silnik60-v1" />
+        <child link="jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1" />
+        <axis xyz="0.0 1.0 0.0" />
+    </joint>
+    <joint name="jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1_Sztywne-4" type="fixed">
+        <origin xyz="-0.23761789 -0.10426027000000002 0.02073868000000001" rpy="-3.818058395732717e-16 -2.524354896707238e-29 0.0" />
+        <parent link="jedziemy_dalej_V2_Przegub_2_ucho_bez_kabla-v7-v1" />
+        <child link="jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1" />
+    </joint>
+    <joint name="jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1_joint3" type="continuous">
+        <origin xyz="0.0 -0.00019999999999999575 0.0" rpy="-9.638134407182025e-45 1.570796326794893 0" />
+        <parent link="jedziemy_dalej_V2_3_przegub-v1_Sprzeglo_ak45-36-v12-v1-v1" />
+        <child link="jedziemy_dalej_V2_Komponent98-v1" />
+        <axis xyz="0.0 -1.0 0.0" />
+    </joint>
+    <joint name="jedziemy_dalej_V2_Komponent98-v1_joint4" type="continuous">
+        <origin xyz="-0.01372318 0.05128649 -0.15941054999999998" rpy="-1.5707963267948966 -1.5777218104420236e-30 0.0" />
+        <parent link="jedziemy_dalej_V2_Komponent98-v1" />
+        <child link="Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1" />
+        <axis xyz="0.087156 -0.996195 2.514749726325267e-29" />
+    </joint>
+    <joint name="Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1_Sztywne-7" type="fixed">
+        <origin xyz="-1.742999999999384e-05 0.0001992399999999961 0.0" rpy="1.5707963267948966 -3.1554436208840472e-30 1.5777218104420236e-30" />
+        <parent link="Bez-nazwy-v1_jedziemy_dalej_V2_silnik_ak_45_36-v1-v1" />
+        <child link="jedziemy_dalej_V2_Obrót-pózniej-v5-v1" />
+    </joint>
+    <joint name="jedziemy_dalej_V2_Obrót-pózniej-v5-v1_Sztywne-8" type="fixed">
+        <origin xyz="-0.006841730000000004 -0.04755 -0.07820128000000001" rpy="-1.5707963267949003 -0.0 0.0" />
+        <parent link="jedziemy_dalej_V2_Obrót-pózniej-v5-v1" />
+        <child link="jedziemy_dalej_V2_silnik_ak45-10-v1" />
+    </joint>
+    <joint name="jedziemy_dalej_V2_Obrót-pózniej-v5-v1_joint5" type="continuous">
+        <origin xyz="-0.006811730000000003 0.04755000000000001 -0.07800354000000002" rpy="1.570796326794893 -0.0 0.0" />
+        <parent link="jedziemy_dalej_V2_Obrót-pózniej-v5-v1" />
+        <child link="jedziemy_dalej_V2_Komponent98-Kopiuj-v1" />
+        <axis xyz="-3.1554436208840472e-30 -3.723162842362723e-15 1.0" />
+    </joint>
+    <joint name="wyjscie_podstawa-v1_Sztywne-10" type="fixed">
+        <origin xyz="-0.009552769999999988 -0.050499999999999996 0.10918289000000002" rpy="-1.5707963267949003 -0.0 0.0" />
+        <parent link="wyjscie_podstawa-v1" />
+        <child link="silnik60-v1" />
+    </joint>
+    <joint name="jedziemy_dalej_V2_Komponent98-Kopiuj-v1_joint6" type="continuous">
+        <origin xyz="0.08989005999999998 -0.03435013000000016 0.04795020999999988" rpy="-3.1415926535897896 -3.155443620884053e-30 1.5777218104420119e-30" />
+        <parent link="jedziemy_dalej_V2_Komponent98-Kopiuj-v1" />
+        <child link="jedziemy_dalej_V2_silnik_ak45-10-Kopiuj-v1" />
+        <axis xyz="0.087156 -0.996195 0.0" />
+    </joint>
+</robot>

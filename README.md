@@ -1,0 +1,63 @@
+# ROS2 Robotic Arm 6-DOF
+
+Projekt edukacyjny budowy systemu sterowania manipulatorem 6-stopniowym w ROS2 Humble.
+
+## Stack technologiczny
+
+- **ROS2 Humble**
+- **C++** (węzły, kontrolery, kinematyka)
+- **Python** (launch files)
+- **Gazebo Fortress** (symulacja)
+- **MoveIt2** (planowanie ruchu)
+- **ros2_control** (framework kontrolerów)
+
+## Struktura projektu
+
+```
+ros2_robotic_arm/
+└── src/
+    └── arm6dof/
+        ├── src/arm/arm_node.cpp    # Główny węzeł C++
+        ├── launch/main.launch.py   # Launch file
+        ├── urdf/arm6dof.urdf       # Opis robota
+        └── urdf/meshes/            # Modele 3D STL
+```
+
+## Status projektu
+
+| Faza | Opis | Status |
+|------|------|--------|
+| 1 | Workspace ROS2, węzeł C++, launch file Python | ✅ |
+| 2 | URDF 6-DOF, TF2, wizualizacja RViz2 | ✅ |
+| 3 | Symulacja Gazebo Fortress | 🔄 W toku |
+| 4 | ros2_control, Hardware Interface, kontrolery | ⏳ |
+| 5 | Kinematyka FK/IK, parametry DH, KDL | ⏳ |
+| 6 | MoveIt2, planowanie ruchu, unikanie kolizji | ⏳ |
+| 7 | Action server/client, LifecycleNode, QoS | ⏳ |
+| 8 | Testy, CI/CD, diagnostyki, Docker | ⏳ |
+
+## Uruchomienie
+
+```bash
+# Zbuduj workspace
+cd ~/ros2_robotic_arm
+colcon build
+
+# Załaduj środowisko
+source install/setup.bash
+
+# Uruchom wizualizację RViz2
+ros2 launch arm6dof main.launch.py
+```
+
+## Wymagania
+
+```bash
+sudo apt install ros-humble-joint-state-publisher
+sudo apt install ros-humble-robot-state-publisher
+sudo apt install ros-humble-ros-gz
+```
+
+## Robot
+
+Manipulator 6-DOF zaprojektowany w CAD. Modele 3D w formacie STL.
