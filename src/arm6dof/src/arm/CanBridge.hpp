@@ -1,16 +1,17 @@
 #pragma once
 
-#include <linux/can.h>
 #include <string>
+#include <vector>
+#include <cstdint>
 
 class CanBridge {
 private:
-    int socket_fd;
+    int serial_fd;
 
 public:
     CanBridge();
     bool open(const std::string& interface);
-    void send(const can_frame& frame);
-    bool receive(can_frame& frame);
+    void send(uint8_t id ,const std::vector<uint8_t>& data);
+    bool receive(uint32_t& id, std::vector<uint8_t>& data);
     void close();
 };

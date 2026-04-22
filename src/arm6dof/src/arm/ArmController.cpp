@@ -12,3 +12,16 @@ ArmController::ArmController(const std::string& interface) {
     can.open(interface);
 
 };
+
+bool ArmController::ServoReceiveData(ServoState& state) {
+    uint32_t id;
+    std::vector<uint8_t> data;
+    bool result = can.receive(id, data);
+    if(result) {
+        state.id = id;
+        state.position = 0.0f;
+        state.torque = 0.0f;
+        state.velocity = 0.0f;
+    }
+    return result;
+}

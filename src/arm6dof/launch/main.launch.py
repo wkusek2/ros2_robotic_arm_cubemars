@@ -11,18 +11,18 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             namespace="arm6dof",
-            executable="arm_node",
+            executable="armnode",
             package="arm6dof"
 
         ),
-        Node(
-            executable="robot_state_publisher",
-            package="robot_state_publisher",
-            parameters=[{'robot_description': robot_description}]
-        ),
-        Node(
-            executable='joint_state_publisher',
-            package="joint_state_publisher"
-        )
+        # Node(
+        #     executable="robot_state_publisher",
+        #     package="robot_state_publisher",
+        #     parameters=[{'robot_description': robot_description}]
+        # ),
+        # Node(
+        #     executable='joint_state_publisher',
+        #     package="joint_state_publisher"
+        # )
 
     ])
