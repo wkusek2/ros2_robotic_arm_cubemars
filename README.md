@@ -17,10 +17,21 @@ Projekt edukacyjny budowy systemu sterowania manipulatorem 6-stopniowym w ROS2 H
 ros2_robotic_arm/
 └── src/
     └── arm6dof/
-        ├── src/arm/arm_node.cpp    # Główny węzeł C++
+        ├── src/arm/
+        │   ├── armnode.cpp         # Główny węzeł ROS2 (ArmNode)
+        │   ├── ArmController.hpp   # Kontroler ramienia
+        │   ├── ArmController.cpp
+        │   ├── CanBridge.hpp       # Warstwa komunikacji SocketCAN
+        │   └── CanBridge.cpp
         ├── launch/main.launch.py   # Launch file
         ├── urdf/arm6dof.urdf       # Opis robota
         └── urdf/meshes/            # Modele 3D STL
+```
+
+### Architektura
+
+```
+ArmNode (ROS2) → ArmController → CanBridge → USB-CAN-A → silniki AK series
 ```
 
 ## Status projektu
@@ -29,7 +40,8 @@ ros2_robotic_arm/
 |------|------|--------|
 | 1 | Workspace ROS2, węzeł C++, launch file Python | ✅ |
 | 2 | URDF 6-DOF, TF2, wizualizacja RViz2 | ✅ |
-| 3 | Symulacja Gazebo Fortress | 🔄 W toku |
+| 3 | CanBridge (SocketCAN), ArmController, integracja USB-CAN-A | ✅ |
+| 4 | Symulacja Gazebo Fortress | ⏳ |
 | 4 | ros2_control, Hardware Interface, kontrolery | ⏳ |
 | 5 | Kinematyka FK/IK, parametry DH, KDL | ⏳ |
 | 6 | MoveIt2, planowanie ruchu, unikanie kolizji | ⏳ |

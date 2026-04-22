@@ -1,13 +1,14 @@
 #include <rclcpp/rclcpp.hpp>
-
+#include "ArmController.hpp"
 class ArmNode : public rclcpp::Node {
     private:
+        ArmController arm_controller;
 
 
 
     public:
 
-        ArmNode() : Node("ArmNode") {
+        ArmNode() : Node("ArmNode"), arm_controller("can0") {
             RCLCPP_INFO(this->get_logger(), "Arm Node Wystartowal");
         };
 

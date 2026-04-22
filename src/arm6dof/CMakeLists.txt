@@ -9,9 +9,12 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
-add_executable(armnode src/arm/armnode.cpp)
+add_executable(armnode src/arm/armnode.cpp src/arm/CanBridge.cpp src/arm/ArmController.cpp)
 ament_target_dependencies(armnode rclcpp)
 install(TARGETS armnode DESTINATION lib/${PROJECT_NAME})
+
+
+
 
 
 
