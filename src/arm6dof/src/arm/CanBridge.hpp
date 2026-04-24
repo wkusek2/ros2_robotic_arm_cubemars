@@ -10,8 +10,13 @@ private:
 
 public:
     CanBridge();
+    ~CanBridge();
     bool open(const std::string& interface);
-    void send(uint8_t id ,const std::vector<uint8_t>& data);
+    void send(uint32_t id ,const std::vector<uint8_t>& data);
     bool receive(uint32_t& id, std::vector<uint8_t>& data);
     void close();
 };
+
+
+
+

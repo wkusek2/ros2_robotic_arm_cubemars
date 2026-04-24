@@ -23,14 +23,14 @@ bool CanBridge::open(const std::string& interface) {
     return true;
 }
 
-void CanBridge::send(uint8_t id, const std::vector<uint8_t>& data) {
+void CanBridge::send(uint32_t id, const std::vector<uint8_t>& data) {
     std::vector<uint8_t> packet;
     packet.push_back(0xAA);
     packet.push_back(0xE0 | data.size());
-    packet.push_back(id);
-    packet.push_back(0x00);
-    packet.push_back(0x00);
-    packet.push_back(0x00);
+    packet.push_back(id >> 0 & 0xFF);
+    packet.push_back(id >> 8 & 0xFF);
+    packet.push_back(id >> 16 & 0xFF);
+    packet.push_back(id >> 24 & 0xFF);
     packet.insert(packet.end(), data.begin(),data.end());
     packet.push_back(0x55);
     int result = write(serial_fd, packet.data(), packet.size());
@@ -58,3 +58,7 @@ void CanBridge::close() {
     ::close(serial_fd);
     serial_fd = -1;
 }
+
+CanBridge::~CanBridge() {
+    CanBridge::close();
+};
