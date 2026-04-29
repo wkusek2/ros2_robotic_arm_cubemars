@@ -10,7 +10,7 @@
 #include <poll.h>
 
 // ============================================================
-// Inicjalizacja
+// Initialization
 // ============================================================
 
 CanBridge::CanBridge() : serial_fd(-1) {}
@@ -22,15 +22,15 @@ CanBridge::~CanBridge() {
 bool CanBridge::open(const std::string& port) {
     serial_fd = ::open(port.c_str(), O_RDWR | O_NOCTTY);
     if (serial_fd == -1) {
-        std::cerr << "Blad otwarcia portu " << port << ": " << strerror(errno) << "\n";
+        std::cerr << "Failed to open port " << port << ": " << strerror(errno) << "\n";
         return false;
     }
 
-    // termios nie obsluguje baudrate 2 Mbps — ustawiamy przez stty.
+    // termios does not support 2 Mbps baudrate — configure via stty instead.
     std::string cmd = "stty -F " + port + " 2000000 raw -echo";
     system(cmd.c_str());
 
-    // Tryb nieblokujacy: VTIME=1 (100ms timeout), VMIN=0 (nie czekaj na min. bajtow).
+    // Non-blocking mode: VTIME=1 (100ms timeout), VMIN=0 (don't wait for minimum bytes).
     struct termios tty;
     tcgetattr(serial_fd, &tty);
     tty.c_cc[VTIME] = 1;
@@ -48,7 +48,7 @@ void CanBridge::close() {
 }
 
 // ============================================================
-// Wysylanie
+// Transmit
 // ============================================================
 
 // Format: AA | (E0 | len) | id[0..3] LE | data[0..n] | 55
@@ -66,7 +66,7 @@ void CanBridge::send(uint32_t id, const std::vector<uint8_t>& data) {
     packet.push_back(0x55);
 
     if (::write(serial_fd, packet.data(), packet.size()) == -1)
-        std::cerr << "Blad wysylania CAN ext: " << strerror(errno) << "\n";
+        std::cerr << "CAN ext send error: " << strerror(errno) << "\n";
 }
 
 // Format: AA | (C0 | len) | id_low | id_high | data[0..n] | 55
@@ -82,53 +82,53 @@ void CanBridge::sendStd(uint16_t id, const std::vector<uint8_t>& data) {
     packet.push_back(0x55);
 
     if (::write(serial_fd, packet.data(), packet.size()) == -1)
-        std::cerr << "Blad wysylania CAN std: " << strerror(errno) << "\n";
+        std::cerr << "CAN std send error: " << strerror(errno) << "\n";
 }
 
 // ============================================================
-// Odbior
+// Receive
 // ============================================================
 
 bool CanBridge::readByte(uint8_t& b) {
     return ::read(serial_fd, &b, 1) == 1;
 }
 
-// Uzywa poll() — watek spi zamiast aktywnie czekac (busy-loop).
+// Uses poll() so the thread sleeps instead of busy-looping.
 bool CanBridge::waitForData(int timeout_ms) {
     struct pollfd pfd = { serial_fd, POLLIN, 0 };
     return poll(&pfd, 1, timeout_ms) > 0;
 }
 
-// Czyta jedna ramke. Rozpoznaje typ po bicie 5 bajtu type_byte:
-//   bit5 = 1 -> extended (4B ID),  przyklad: 0xE8 = extended, 8B danych
-//   bit5 = 0 -> standard (2B ID),  przyklad: 0xC8 = standard,  8B danych
+// Reads one frame. Detects type from bit 5 of type_byte:
+//   bit5 = 1 -> extended (4B ID),  e.g. 0xE8 = extended, 8B data
+//   bit5 = 0 -> standard (2B ID),  e.g. 0xC8 = standard, 8B data
 bool CanBridge::receive(uint32_t& id, std::vector<uint8_t>& data) {
     uint8_t b;
 
-    // Synchronizacja: szukaj bajtu startowego 0xAA.
+    // Sync: scan for start byte 0xAA.
     do {
         if (!readByte(b)) return false;
     } while (b != 0xAA);
 
-    // Bajt typu: [7:6]=typ ramki, [5]=extended flag, [3:0]=DLC.
+    // Type byte: [7:6]=frame type, [5]=extended flag, [3:0]=DLC.
     if (!readByte(b)) return false;
     uint8_t data_len = b & 0x0F;
     bool    is_extended = (b & 0x20) != 0;
     int     id_len      = is_extended ? 4 : 2;
 
-    // Odczyt ID (little-endian, 2 lub 4 bajty).
+    // Read ID (little-endian, 2 or 4 bytes).
     uint8_t id_bytes[4] = {};
     for (int i = 0; i < id_len; i++) {
         if (!readByte(id_bytes[i])) return false;
     }
 
-    // Odczyt payload.
+    // Read payload.
     data.resize(data_len);
     for (int i = 0; i < data_len; i++) {
         if (!readByte(data[i])) return false;
     }
 
-    // Weryfikacja bajtu stopu.
+    // Verify stop byte.
     if (!readByte(b) || b != 0x55) return false;
 
     id = id_bytes[0]

@@ -1,23 +1,23 @@
 #pragma once
 
 // ============================================================
-// ArmController — sterowanie silnikami ramienia 6-DOF przez CAN
+// ArmController — motor control for 6-DOF arm over CAN
 // ============================================================
-// Warstwa posrednia miedzy wezlem ROS2 a adapterem USB-CAN.
-// Obsluguje dwa tryby komunikacji z silnikami CubeMars AK45-36:
+// Intermediate layer between the ros2_control Hardware Interface
+// and the USB-CAN adapter. Supports two communication modes
+// for CubeMars AK45-36 motors:
 //
-//   Tryb serwo (VESC CAN):
-//     - CMD_SET_POS    (cmd=4): zadanie pozycji w stopniach
-//     - CMD_SET_CURRENT (cmd=1): zadanie pradu w mA
-//     - Feedback: extended frame 0x29xx, dane co ~150 Hz
+//   Servo mode (VESC CAN):
+//     - CMD_SET_POS    (cmd=4): position setpoint in degrees
+//     - CMD_SET_CURRENT (cmd=1): current setpoint in mA
+//     - Feedback: extended frame 0x29xx, ~150 Hz
 //
-//   Tryb MIT (CubeMars MIT Mode):
-//     - Ramka 8B: [p(16b) | v(12b) | kp(12b) | kd(12b) | tau(12b)]
-//     - Enable/disable/zero przez specjalne bajty 0xFC/0xFD/0xFE
-//     - Feedback: standard frame, motor_id w data[0]
+//   MIT mode (CubeMars MIT Cheetah):
+//     - 8B frame: [p(16b) | v(12b) | kp(12b) | kd(12b) | tau(12b)]
+//     - Enable/disable/zero via special bytes 0xFC/0xFD/0xFE
+//     - Feedback: standard frame, motor_id in data[0]
 //
-// Bezpieczenstwo watkowe: can_mutex_ chroni dostep do szyny CAN.
-// canLoop (watek) i subscriber ROS2 (spin) pisza jednoczesnie.
+// Thread safety: can_mutex_ guards all CAN bus access.
 // ============================================================
 
 #include <array>
@@ -25,31 +25,31 @@
 #include <mutex>
 #include "CanBridge.hpp"
 
-// --- Struktury danych feedbacku ---
+// --- Feedback data structures ---
 
-// Stan silnika w trybie serwo (ramka 0x29xx).
+// Motor state in servo mode (frame 0x29xx).
 struct ServoState {
-    int    id;        // CAN ID silnika (1-7)
-    float  position;  // pozycja [stopnie], raw/10
-    float  velocity;  // predkosc [eRPM/10]
-    float  torque;    // prad fazowy [A], raw/100
-    int8_t temp;      // temperatura sterownika [°C]
+    int    id;        // CAN motor ID (1-7)
+    float  position;  // position [degrees], raw/10
+    float  velocity;  // speed [eRPM/10]
+    float  torque;    // phase current [A], raw/100
+    int8_t temp;      // controller temperature [°C]
 };
 
-// Stan silnika w trybie MIT (standard frame).
+// Motor state in MIT mode (standard frame).
 struct MITState {
-    int     id;           // CAN ID silnika (1-7)
-    float   position;     // pozycja [rad], zakres ±12.5
-    float   velocity;     // predkosc [rad/s], zakres ±50
-    float   torque;       // moment [Nm], zakres ±18
-    uint8_t temperature;  // temperatura [°C]
-    uint8_t error;        // kod bledu (0 = brak)
+    int     id;           // CAN motor ID (1-7)
+    float   position;     // position [rad], range ±12.5
+    float   velocity;     // velocity [rad/s], range ±50
+    float   torque;       // torque [Nm], range ±18
+    uint8_t temperature;  // temperature [°C]
+    uint8_t error;        // error code (0 = none)
 };
 
-// Wynik receiveAny() — typ odebranej ramki.
+// Return type of receiveAny() — which frame was received.
 enum class FrameType { NONE, SERVO, MIT };
 
-// --- Klasa kontrolera ---
+// --- Controller class ---
 
 class ArmController {
 public:
@@ -57,44 +57,44 @@ public:
 
     explicit ArmController(const std::string& can_port);
 
-    // --- Odbior ---
+    // --- Receive ---
 
-    // Czyta jedna ramke z CAN i rozpoznaje jej typ (SERVO lub MIT).
-    // Wypelnia odpowiedni struct. Wywolywane wylacznie z canLoop.
+    // Reads one CAN frame and identifies its type (SERVO or MIT).
+    // Populates the corresponding struct.
     FrameType receiveAny(ServoState& servo, MITState& mit);
 
-    // Zwraca bufor ostatnich znanych stanow serwo (indeks = motor_id - 1).
+    // Returns the buffer of last known servo states (index = motor_id - 1).
     const std::array<ServoState, NUM_MOTORS>& getStates() const { return states_; }
 
-    // Dostep do adaptera CAN (np. waitForData w canLoop).
+    // Access to the CAN adapter (e.g. for waitForData).
     CanBridge& getCan() { return can; }
 
-    // --- Wysylanie — tryb serwo ---
+    // --- Transmit — servo mode ---
 
-    // Zadanie pozycji [stopnie] przez VESC CAN (CMD=4).
+    // Position setpoint [degrees] via VESC CAN (CMD=4).
     bool setPosMotor(int motor_id, float degrees);
 
-    // Zadanie pradu [A] przez VESC CAN (CMD=1).
+    // Current setpoint [A] via VESC CAN (CMD=1).
     bool setCurrentMotor(int motor_id, float current);
 
-    // --- Wysylanie — tryb MIT ---
+    // --- Transmit — MIT mode ---
 
-    // Wlacza tryb MIT na silniku (wysyla 7xFF + 0xFC).
+    // Enables MIT mode on the motor (sends 7xFF + 0xFC).
     void mitEnable(int motor_id);
 
-    // Wylacza tryb MIT (wysyla 7xFF + 0xFD).
+    // Disables MIT mode (sends 7xFF + 0xFD).
     void mitDisable(int motor_id);
 
-    // Zeruje enkoder w biezacej pozycji (wysyla 7xFF + 0xFE).
+    // Zeros the encoder at the current position (sends 7xFF + 0xFE).
     void mitZero(int motor_id);
 
-    // Wysyla komende sterowania MIT: pozycja [rad], predkosc [rad/s],
-    // gain pozycji kp, gain predkosci kd, moment feed-forward [Nm].
+    // Sends a MIT control command: position [rad], velocity [rad/s],
+    // position gain kp, velocity gain kd, feed-forward torque [Nm].
     void sendMIT(int motor_id, float p, float v, float kp, float kd, float torque);
 
 private:
     int    motor_ids[NUM_MOTORS];
     CanBridge can;
-    std::mutex can_mutex_;                        // mutex dla dostepu do can z wielu watkow
-    std::array<ServoState, NUM_MOTORS> states_{}; // bufor ostatnich stanow serwo
+    std::mutex can_mutex_;                        // guards CAN bus access from multiple threads
+    std::array<ServoState, NUM_MOTORS> states_{}; // last known servo state per motor
 };

@@ -12,6 +12,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MITFeedback.msg"
@@ -19,12 +21,20 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 
 
-add_executable(armnode src/arm/armnode.cpp src/arm/CanBridge.cpp src/arm/ArmController.cpp)
+add_executable(armnode src/arm/armnode.cpp)
 ament_target_dependencies(armnode rclcpp sensor_msgs diagnostic_msgs std_msgs)
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 target_link_libraries(armnode ${cpp_typesupport_target})
 
-install(TARGETS armnode DESTINATION lib/${PROJECT_NAME})
+add_library(arm6dof_hardware SHARED
+  src/arm/CanBridge.cpp
+  src/arm/ArmController.cpp
+  src/arm/ArmHardwareInterface.cpp
+)
+ament_target_dependencies(arm6dof_hardware rclcpp hardware_interface)
+pluginlib_export_plugin_description_file(hardware_interface arm6dof_plugin.xml)
+
+install(TARGETS armnode arm6dof_hardware DESTINATION lib/${PROJECT_NAME})
 
 
 

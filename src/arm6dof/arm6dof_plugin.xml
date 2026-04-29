@@ -1,0 +1,7 @@
+<library path="arm6dof">
+  <class name="arm6dof/ArmHardwareInterface"
+         type="ArmHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>ros2_control Hardware Interface for 6-DOF arm via Waveshare USB-CAN-A</description>
+  </class>
+</library>

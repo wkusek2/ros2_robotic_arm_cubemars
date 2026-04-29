@@ -5,26 +5,26 @@
 #include <vector>
 
 // ============================================================
-// Stale protokolu CAN — tryb serwo (VESC CAN)
+// CAN protocol constants — servo mode (VESC CAN)
 // ============================================================
-// ID ramki = (cmd << 8) | motor_id
+// Frame ID = (cmd << 8) | motor_id
 // Payload: int32 big-endian
 
-static constexpr int CMD_SET_CURRENT = 1;  // payload: prąd [mA]
-static constexpr int CMD_SET_POS     = 4;  // payload: pozycja [stopnie * 1e6]
+static constexpr int CMD_SET_CURRENT = 1;  // payload: current [mA]
+static constexpr int CMD_SET_POS     = 4;  // payload: position [degrees * 1e6]
 
-// Maska ID statusu: ramki 0x2901..0x2907 to feedback serwo.
+// Status ID mask: frames 0x2901..0x2907 are servo feedback.
 static constexpr uint32_t STATUS_ID_MASK  = 0xFF00;
 static constexpr uint32_t STATUS_ID_VALUE = 0x2900;
 
 // ============================================================
-// Stale protokolu MIT — zakresy fizyczne (AK45-36)
+// MIT protocol constants — physical ranges (AK45-36)
 // ============================================================
-// Wartosci float sa pakowane do uint o podanej liczbie bitow
-// liniowo miedzy [MIN, MAX]. Rozdzielczosc:
-//   pozycja: 25 rad / 65535 = 0.00038 rad
-//   predkosc: 100 rad/s / 4095 = 0.024 rad/s
-//   moment:   36 Nm / 4095 = 0.009 Nm
+// Float values are packed into uints of the given bit width,
+// linearly mapped between [MIN, MAX]. Resolution:
+//   position: 25 rad / 65535 = 0.00038 rad
+//   velocity: 100 rad/s / 4095 = 0.024 rad/s
+//   torque:   36 Nm / 4095 = 0.009 Nm
 
 static constexpr float P_MIN  = -12.5f, P_MAX  =  12.5f;  // [rad]
 static constexpr float V_MIN  = -50.0f, V_MAX  =  50.0f;  // [rad/s]
@@ -33,38 +33,38 @@ static constexpr float KD_MIN =   0.0f, KD_MAX =   5.0f;
 static constexpr float T_MIN  = -18.0f, T_MAX  =  18.0f;  // [Nm]
 
 // ============================================================
-// Pomocnicze funkcje konwersji MIT
+// MIT conversion helpers
 // ============================================================
 
-// Konwertuje float z zakresu [xmin, xmax] do uint o 'bits' bitach.
+// Maps a float from [xmin, xmax] to an unsigned int of 'bits' bits.
 static uint32_t floatToUint(float x, float xmin, float xmax, int bits) {
     x = std::clamp(x, xmin, xmax);
     return static_cast<uint32_t>((x - xmin) / (xmax - xmin) * ((1 << bits) - 1));
 }
 
-// Konwertuje uint z 'bits' bitow z powrotem do float.
+// Maps an unsigned int of 'bits' bits back to a float in [xmin, xmax].
 static float uintToFloat(uint32_t x, float xmin, float xmax, int bits) {
     return static_cast<float>(x) * (xmax - xmin) / static_cast<float>((1 << bits) - 1) + xmin;
 }
 
 // ============================================================
-// Inicjalizacja
+// Initialization
 // ============================================================
 
 ArmController::ArmController(const std::string& can_port) {
     for (int i = 0; i < NUM_MOTORS; i++)
-        motor_ids[i] = i + 1;  // silniki 1..6
+        motor_ids[i] = i + 1;  // motors 1..6
 
     can.open(can_port);
 }
 
 // ============================================================
-// Odbior — receiveAny
+// Receive — receiveAny
 // ============================================================
-// Czyta dokladnie jedna ramke z CAN i rozpoznaje jej typ:
-//   SERVO — extended ID z gornym bajtem 0x29, payload >=7B
-//   MIT   — standard ID (<=0x7FF), payload ==8B z motor_id w data[0]
-//   NONE  — timeout, blad synchronizacji lub nieznany typ
+// Reads exactly one CAN frame and identifies its type:
+//   SERVO — extended ID with upper byte 0x29, payload >=7B
+//   MIT   — standard ID (<=0x7FF), payload ==8B with motor_id in data[0]
+//   NONE  — timeout, sync error, or unknown type
 
 FrameType ArmController::receiveAny(ServoState& servo, MITState& mit) {
     uint32_t id;
@@ -72,7 +72,7 @@ FrameType ArmController::receiveAny(ServoState& servo, MITState& mit) {
 
     if (!can.receive(id, data)) return FrameType::NONE;
 
-    // --- Ramka serwo ---
+    // --- Servo frame ---
     if ((id & STATUS_ID_MASK) == STATUS_ID_VALUE && data.size() >= 7) {
         servo.id       = static_cast<int>(id & 0xFF);
         servo.position = static_cast<int16_t>((data[0] << 8) | data[1]) / 10.0f;
@@ -87,13 +87,13 @@ FrameType ArmController::receiveAny(ServoState& servo, MITState& mit) {
         return FrameType::SERVO;
     }
 
-    // --- Ramka MIT ---
-    // Uklad bitow payload (8 bajtow):
-    //   [0..1]       pozycja   16b
-    //   [2] + [3>>4] predkosc  12b
-    //   [3&F] + [4]  kp        12b  (w feedbacku: unused, ale format taki sam)
+    // --- MIT frame ---
+    // Payload bit layout (8 bytes):
+    //   [0..1]       position  16b
+    //   [2] + [3>>4] velocity  12b
+    //   [3&F] + [4]  kp        12b  (unused in feedback, same format)
     //   [5] + [6>>4] kd        12b
-    //   [6&F] + [7]  moment    12b
+    //   [6&F] + [7]  torque    12b
     if (id <= 0x7FF && data.size() == 8) {
         uint32_t p_i = (static_cast<uint32_t>(data[1]) << 8) | data[2];
         uint32_t v_i = (static_cast<uint32_t>(data[3]) << 4) | (data[4] >> 4);
@@ -113,7 +113,7 @@ FrameType ArmController::receiveAny(ServoState& servo, MITState& mit) {
 }
 
 // ============================================================
-// Wysylanie — tryb serwo
+// Transmit — servo mode
 // ============================================================
 
 bool ArmController::setPosMotor(int motor_id, float degrees) {
@@ -143,10 +143,10 @@ bool ArmController::setCurrentMotor(int motor_id, float current) {
 }
 
 // ============================================================
-// Wysylanie — tryb MIT
+// Transmit — MIT mode
 // ============================================================
-// Komendy specjalne: 7xFF + ostatni bajt rozroznia akcje.
-// Ramka komendy MIT: 8 bajtow z upakowanymi polami float->uint.
+// Special commands: 7xFF + last byte distinguishes the action.
+// MIT command frame: 8 bytes with packed float->uint fields.
 
 static const std::vector<uint8_t> MIT_ENABLE  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFC};
 static const std::vector<uint8_t> MIT_DISABLE = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFD};
@@ -167,14 +167,14 @@ void ArmController::mitZero(int motor_id) {
     can.sendStd(motor_id, MIT_ZERO);
 }
 
-// Pakowanie komendy MIT w 8 bajtow:
-//   data[0..1]  pozycja   16b BE
-//   data[2]     predkosc  [11:4]
-//   data[3]     predkosc  [3:0] | kp [11:8]
+// Pack MIT command into 8 bytes:
+//   data[0..1]  position  16b BE
+//   data[2]     velocity  [11:4]
+//   data[3]     velocity  [3:0] | kp [11:8]
 //   data[4]     kp        [7:0]
 //   data[5]     kd        [11:4]
-//   data[6]     kd        [3:0] | moment [11:8]
-//   data[7]     moment    [7:0]
+//   data[6]     kd        [3:0] | torque [11:8]
+//   data[7]     torque    [7:0]
 void ArmController::sendMIT(int motor_id, float p, float v, float kp, float kd, float torque) {
     uint32_t p_i  = floatToUint(p,      P_MIN,  P_MAX,  16);
     uint32_t v_i  = floatToUint(v,      V_MIN,  V_MAX,  12);

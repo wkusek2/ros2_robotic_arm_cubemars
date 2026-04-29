@@ -1,19 +1,19 @@
 #pragma once
 
 // ============================================================
-// CanBridge — warstwa komunikacji z adapterem Waveshare USB-CAN-A
+// CanBridge — serial communication layer for Waveshare USB-CAN-A
 // ============================================================
-// Adapter laczy sie przez port szeregowy (USB-CDC) z baudrate 2 Mbps.
-// Kazda ramka CAN jest opakowana w ramke adapterowa:
+// The adapter connects via USB-CDC serial at 2 Mbps baudrate.
+// Each CAN frame is wrapped in an adapter frame:
 //
-//   Wysylanie extended 29-bit (tryb serwo):
+//   Sending extended 29-bit (servo mode):
 //     AA | (E0 | len) | id[4B LE] | data[len] | 55
 //
-//   Wysylanie standard 11-bit (tryb MIT):
+//   Sending standard 11-bit (MIT mode):
 //     AA | (C0 | len) | id_low | id_high | data[len] | 55
 //
-//   Odbior (auto-detekcja standard/extended po bicie 5 bajtu typu):
-//     AA | type_byte | id[2 lub 4 B LE] | data[len] | 55
+//   Receiving (auto-detects standard/extended from bit 5 of type byte):
+//     AA | type_byte | id[2 or 4 B LE] | data[len] | 55
 // ============================================================
 
 #include <cstdint>
@@ -25,27 +25,27 @@ public:
     CanBridge();
     ~CanBridge();
 
-    // --- Inicjalizacja ---
+    // --- Initialization ---
 
-    // Otwiera port szeregowy i ustawia baudrate 2 Mbps.
+    // Opens the serial port and configures 2 Mbps baudrate.
     bool open(const std::string& port);
 
-    // --- Wysylanie ---
+    // --- Transmit ---
 
-    // Ramka extended 29-bit — uzywana w trybie serwo (CMD_SET_POS, CMD_SET_CURRENT).
+    // Extended 29-bit frame — used in servo mode (CMD_SET_POS, CMD_SET_CURRENT).
     void send(uint32_t id, const std::vector<uint8_t>& data);
 
-    // Ramka standard 11-bit — uzywana w trybie MIT (komendy sterowania i enable/disable).
+    // Standard 11-bit frame — used in MIT mode (control commands and enable/disable).
     void sendStd(uint16_t id, const std::vector<uint8_t>& data);
 
-    // --- Odbior ---
+    // --- Receive ---
 
-    // Blokuje watek az pojawia sie dane na FD (lub minie timeout_ms).
-    // Uzyc przed receive() zeby uniknac busy-loop i zbednego zuzycia CPU.
+    // Blocks until data arrives on the fd (or timeout_ms elapses).
+    // Call before receive() to avoid busy-looping and wasting CPU.
     bool waitForData(int timeout_ms);
 
-    // Czyta jedna kompletna ramke CAN. Automatycznie rozpoznaje standard/extended
-    // po bicie 5 bajtu typu. Zwraca false przy timeoucie lub bledzie synchronizacji.
+    // Reads one complete CAN frame. Auto-detects standard/extended
+    // from bit 5 of the type byte. Returns false on timeout or sync error.
     bool receive(uint32_t& id, std::vector<uint8_t>& data);
 
 private:
