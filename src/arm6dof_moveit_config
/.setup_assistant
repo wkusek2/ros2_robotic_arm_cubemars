@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: arm6dof
+    relative_path: urdf/arm6dof.urdf
+  srdf:
+    relative_path: config/arm6dof.srdf
+  package_settings:
+    author_name: Wiktor Kusek
+    author_email: wkusek2@gmail.com
+    generated_timestamp: 1777471747
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

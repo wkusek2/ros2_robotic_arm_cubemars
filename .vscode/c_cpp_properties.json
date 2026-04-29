@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/wiktor/ros2_nauka/install/esp32_bridge/include/**",
+        "/opt/ros/humble/include/**",
+        "/opt/ros/humble/include/diagnostic_msgs/**",
+        "/opt/ros/humble/include/sensor_msgs/**",
+        "/usr/include/**",
+        "/home/wiktor/ros2_projekt/ros2_robotic_arm/src/**"
+      ],
+      "name": "ros2",
+      "compileCommands": "${workspaceFolder}/build/arm6dof/compile_commands.json",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}
