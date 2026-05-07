@@ -35,5 +35,5 @@ private:
     QPushButton* btn_send_{nullptr};
     bool send_active_{false};
     QPushButton* btn_poll_{nullptr};
-    bool poll_active_{true};
+    bool poll_active_{false};
 };
