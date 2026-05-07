@@ -25,6 +25,7 @@ class ArmHardwareInterface : public hardware_interface::SystemInterface {
     std::vector<double> hw_states_position_;
     std::vector<double> hw_commands_;
     std::vector<double> hw_commands_velocity_;
+    std::vector<double> position_offsets_;
 
     std::unique_ptr<ArmController> arm_controller_;
 

@@ -126,7 +126,7 @@ hardware_interface::return_type ArmHardwareInterface::read(const rclcpp::Time&, 
         double new_pos = states[i].position;
         double new_vel = states[i].velocity;
         if (std::abs(new_pos) <= 12.5)
-            hw_states_position_[i] = new_pos * (INVERTED[i] ? -1.0 : 1.0);
+            hw_states_position_[i] = (new_pos - position_offsets_[i]) * (INVERTED[i] ? -1.0 : 1.0);
         if (std::abs(new_vel) <= 50.0)
             hw_states_velocity_[i] = new_vel;
     }
@@ -150,7 +150,7 @@ hardware_interface::return_type ArmHardwareInterface::write(const rclcpp::Time&,
             continue;
         }
         const auto& mp = MOTOR_PARAMS[i];
-        float cmd_pos = static_cast<float>(hw_commands_[i]) * (INVERTED[i] ? -1.0f : 1.0f);
+        float cmd_pos = static_cast<float>(hw_commands_[i] + position_offsets_[i]) * (INVERTED[i] ? -1.0f : 1.0f);
         arm_controller_->sendMITAndReceive(motor_id, cmd_pos,
                                           static_cast<float>(hw_commands_velocity_[i]), mp.kp_cmd, mp.kd_cmd, 0.0f);
     }

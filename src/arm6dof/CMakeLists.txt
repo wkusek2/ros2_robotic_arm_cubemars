@@ -24,10 +24,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 
 
-add_executable(armnode src/arm/armnode.cpp)
-ament_target_dependencies(armnode rclcpp sensor_msgs diagnostic_msgs std_msgs)
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
-target_link_libraries(armnode ${cpp_typesupport_target})
 
 add_library(arm6dof_hardware SHARED
   src/arm/CanBridge.cpp
@@ -45,7 +42,7 @@ ament_target_dependencies(arm6dof_rviz_panel rclcpp rviz_common std_msgs pluginl
 target_link_libraries(arm6dof_rviz_panel Qt5::Widgets)
 pluginlib_export_plugin_description_file(rviz_common arm_panel_plugin.xml)
 
-install(TARGETS armnode arm6dof_hardware arm6dof_rviz_panel DESTINATION lib/${PROJECT_NAME})
+install(TARGETS arm6dof_hardware arm6dof_rviz_panel DESTINATION lib/${PROJECT_NAME})
 
 
 

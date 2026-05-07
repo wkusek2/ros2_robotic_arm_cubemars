@@ -15,10 +15,5 @@ def generate_launch_description():
 
     return LaunchDescription([
         ExecuteProcess(cmd=['stty', '-F', '/dev/ttyUSB0', '2000000'], output='screen'),
-        Node(
-            namespace="arm6dof",
-            executable="armnode",
-            package="arm6dof"
-        ),
         moveit_demo,
     ])
