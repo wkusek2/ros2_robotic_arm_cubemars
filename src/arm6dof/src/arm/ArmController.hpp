@@ -80,6 +80,12 @@ public:
     // Returns true and updates internal state on success.
     bool sendMITAndReceive(int motor_id, float p, float v, float kp, float kd, float torque);
 
+    // Requests current state without applying force:
+    //   standard motors → MIT enable frame (FF..FC), motor reports current state
+    //   motor 2 (AK60-39) → zero-gain MIT command, motor reports current state
+    // Updates mit_states_ on success.
+    bool requestStateAndReceive(int motor_id);
+
 private:
     CanBridge can;
     mutable std::mutex can_mutex_;

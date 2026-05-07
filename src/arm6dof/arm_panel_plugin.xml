@@ -1,0 +1,7 @@
+<library path="arm6dof_rviz_panel">
+  <class name="arm6dof/ArmControlPanel"
+         type="ArmControlPanel"
+         base_class_type="rviz_common::Panel">
+    <description>Arm motor control: enable / disable / zero per motor</description>
+  </class>
+</library>

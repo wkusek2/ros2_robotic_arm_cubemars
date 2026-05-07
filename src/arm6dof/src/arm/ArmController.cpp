@@ -157,6 +157,28 @@ void ArmController::sendMIT(int motor_id, float p, float v, float kp, float kd, 
     can.sendStd(motor_id, data);
 }
 
+bool ArmController::requestStateAndReceive(int motor_id) {
+    if (motor_id == 2) {
+        // AK60-39: zero-gain MIT command → no force applied, motor replies with state
+        return sendMITAndReceive(2, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    // Standard motors: MIT enable frame (FF..FC) → motor replies with current state
+    {
+        std::lock_guard<std::mutex> lock(can_mutex_);
+        can.sendStd(motor_id, MIT_ENABLE);
+    }
+    for (int attempt = 0; attempt < 5; attempt++) {
+        if (!can.waitForData(3)) break;
+        MITState mit;
+        if (!receiveMIT(mit)) continue;
+        if (mit.id != motor_id) continue;
+        std::lock_guard<std::mutex> lock(state_mutex_);
+        mit_states_[motor_id - 1] = mit;
+        return true;
+    }
+    return false;
+}
+
 bool ArmController::sendMITAndReceive(int motor_id, float p, float v, float kp, float kd, float torque) {
     sendMIT(motor_id, p, v, kp, kd, torque);
 

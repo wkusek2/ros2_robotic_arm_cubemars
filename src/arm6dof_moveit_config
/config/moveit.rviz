@@ -1,4 +1,6 @@
 Panels:
+  - Class: arm6dof/ArmControlPanel
+    Name: Arm Control
   - Class: rviz_common/Displays
     Name: Displays
     Property Tree Widget:

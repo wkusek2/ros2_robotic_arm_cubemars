@@ -2,6 +2,11 @@
 #include "pluginlib/class_list_macros.hpp"
 #include <cmath>
 
+static const int ACTIVE_MOTORS[] = {1, 2, 3, 4, 5, 6, 7};
+static const bool INVERTED[7] = {true, true, true,
+     false, true, false, false};
+
+
 
 
 hardware_interface::CallbackReturn ArmHardwareInterface::on_init(const hardware_interface::HardwareInfo& info){
@@ -12,17 +17,68 @@ hardware_interface::CallbackReturn ArmHardwareInterface::on_init(const hardware_
     hw_commands_.resize(7, 0.0);
     hw_commands_velocity_.resize(7, 0.0);
 
+
     node_ = std::make_shared<rclcpp::Node>("arm_hardware_interface");
     mit_enable_sub_ = node_->create_subscription<std_msgs::msg::Int32>(
         "mit_enable", 10,
         [this](const std_msgs::msg::Int32::SharedPtr msg) {
             int id = msg->data;
+            if (id == 0)             { for (int i = 1; i <= 7; i++) arm_controller_->mitEnable(i); }
+            else if (id >= 1 && id <= 7) arm_controller_->mitEnable(id);
+        });
+
+    mit_disable_sub_ = node_->create_subscription<std_msgs::msg::Int32>(
+        "mit_disable", 10,
+        [this](const std_msgs::msg::Int32::SharedPtr msg) {
+            int id = msg->data;
+            if (id == 0)             { for (int i = 1; i <= 7; i++) arm_controller_->mitDisable(i); }
+            else if (id >= 1 && id <= 7) arm_controller_->mitDisable(id);
+        });
+
+    mit_zero_sub_ = node_->create_subscription<std_msgs::msg::Int32>(
+        "mit_zero", 10,
+        [this](const std_msgs::msg::Int32::SharedPtr msg) {
+            int id = msg->data;
             if (id == 0) {
-                for (int i = 1; i <= 7; i++) arm_controller_->mitEnable(i);
+                for (int i = 1; i <= 7; i++) arm_controller_->mitZero(i);
+                cmd_seeded_.fill(false);
             } else if (id >= 1 && id <= 7) {
-                arm_controller_->mitEnable(id);
+                arm_controller_->mitZero(id);
+                cmd_seeded_[id - 1] = false;
             }
         });
+
+    arm_poll_sub_ = node_->create_subscription<std_msgs::msg::Bool>(
+        "arm_poll_enable", 10,
+        [this](const std_msgs::msg::Bool::SharedPtr msg) {
+            poll_enabled_ = msg->data;
+        });
+
+    arm_send_sub_ = node_->create_subscription<std_msgs::msg::Bool>(
+        "arm_send_enable", 10,
+        [this](const std_msgs::msg::Bool::SharedPtr msg) {
+            if (msg->data && !send_enabled_) {
+                // Poll each motor for current state before enabling send
+                for (int motor_id : ACTIVE_MOTORS)
+                    arm_controller_->requestStateAndReceive(motor_id);
+
+                // Seed commands from real feedback positions
+                const auto states = arm_controller_->getMITStates();
+                for (int motor_id : ACTIVE_MOTORS) {
+                    int i = motor_id - 1;
+                    if (states[i].valid) {
+                        hw_commands_[i]          = hw_states_position_[i];
+                        hw_commands_velocity_[i] = 0.0;
+                        cmd_seeded_[i]           = true;
+                    }
+                }
+            }
+            if (!msg->data) {
+                cmd_seeded_.fill(false);  // reset przy wyłączeniu
+            }
+            send_enabled_ = msg->data;
+        });
+
     executor_.add_node(node_);
     executor_thread_ = std::thread([this]() { executor_.spin(); });
 
@@ -36,11 +92,6 @@ ArmHardwareInterface::~ArmHardwareInterface() {
 }
 
 hardware_interface::CallbackReturn ArmHardwareInterface::on_activate(const rclcpp_lifecycle::State&) {
-    for (int i = 1; i <= 7; i++) {
-        arm_controller_->mitEnable(i);
-        sleep(2);
-        arm_controller_->mitZero(i);
-    }
     return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -69,43 +120,38 @@ std::vector<hardware_interface::CommandInterface> ArmHardwareInterface::export_c
 }
 
 hardware_interface::return_type ArmHardwareInterface::read(const rclcpp::Time&, const rclcpp::Duration&) {
-    static constexpr double MAX_POS_JUMP = 0.5;
-    static std::array<bool, 7> seeded{};
     const auto states = arm_controller_->getMITStates();
     for (int i = 0; i < 7; i++) {
         if (!states[i].valid) continue;
         double new_pos = states[i].position;
         double new_vel = states[i].velocity;
-        if (std::abs(new_pos) <= 12.5) {
-            if (!seeded[i] || std::abs(new_pos - hw_states_position_[i]) <= MAX_POS_JUMP) {
-                hw_states_position_[i] = new_pos;
-                seeded[i] = true;
-            }
-        }
+        if (std::abs(new_pos) <= 12.5)
+            hw_states_position_[i] = new_pos * (INVERTED[i] ? -1.0 : 1.0);
         if (std::abs(new_vel) <= 50.0)
             hw_states_velocity_[i] = new_vel;
     }
     return hardware_interface::return_type::OK;
 }
 
-// Only send to connected motors (1 and 3); expand when new motors arrive.
-static const int ACTIVE_MOTORS[] = {1, 2, 3, 4, 5, 6, 7};
-
-static std::array<bool, 7> cmd_seeded{};
 
 hardware_interface::return_type ArmHardwareInterface::write(const rclcpp::Time&, const rclcpp::Duration&) {
+    if (!send_enabled_) {
+        if (poll_enabled_) {
+            for (int motor_id : ACTIVE_MOTORS)
+                arm_controller_->requestStateAndReceive(motor_id);
+        }
+        return hardware_interface::return_type::OK;
+    }
     for (int motor_id : ACTIVE_MOTORS) {
         int i = motor_id - 1;
-        if (!cmd_seeded[i]) {
-            if (std::abs(hw_states_position_[i]) <= 12.5) {
-                hw_commands_[i] = hw_states_position_[i];
-                cmd_seeded[i] = true;
-            } else {
-                continue;  // czekaj na pierwszy feedback zanim zaczniesz wysylac
-            }
+        if (!cmd_seeded_[i]) {
+            if (poll_enabled_)
+                arm_controller_->requestStateAndReceive(motor_id);
+            continue;
         }
         const auto& mp = MOTOR_PARAMS[i];
-        arm_controller_->sendMITAndReceive(motor_id, static_cast<float>(hw_commands_[i]),
+        float cmd_pos = static_cast<float>(hw_commands_[i]) * (INVERTED[i] ? -1.0f : 1.0f);
+        arm_controller_->sendMITAndReceive(motor_id, cmd_pos,
                                           static_cast<float>(hw_commands_velocity_[i]), mp.kp_cmd, mp.kd_cmd, 0.0f);
     }
     return hardware_interface::return_type::OK;

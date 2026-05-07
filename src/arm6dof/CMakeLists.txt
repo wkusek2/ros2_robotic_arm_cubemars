@@ -14,6 +14,9 @@ find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(rviz_common REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
+set(CMAKE_AUTOMOC ON)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MITFeedback.msg"
@@ -34,7 +37,15 @@ add_library(arm6dof_hardware SHARED
 ament_target_dependencies(arm6dof_hardware rclcpp hardware_interface pluginlib std_msgs)
 pluginlib_export_plugin_description_file(hardware_interface arm6dof_plugin.xml)
 
-install(TARGETS armnode arm6dof_hardware DESTINATION lib/${PROJECT_NAME})
+add_library(arm6dof_rviz_panel SHARED
+  src/rviz/ArmControlPanel.cpp
+)
+target_include_directories(arm6dof_rviz_panel PRIVATE src/rviz)
+ament_target_dependencies(arm6dof_rviz_panel rclcpp rviz_common std_msgs pluginlib)
+target_link_libraries(arm6dof_rviz_panel Qt5::Widgets)
+pluginlib_export_plugin_description_file(rviz_common arm_panel_plugin.xml)
+
+install(TARGETS armnode arm6dof_hardware arm6dof_rviz_panel DESTINATION lib/${PROJECT_NAME})
 
 
 

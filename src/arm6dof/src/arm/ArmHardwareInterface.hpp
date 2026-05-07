@@ -4,6 +4,8 @@
 #include "ArmController.hpp"
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int32.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <atomic>
 #include <vector>
 #include <memory>
 #include <thread>
@@ -28,6 +30,13 @@ class ArmHardwareInterface : public hardware_interface::SystemInterface {
 
     rclcpp::Node::SharedPtr node_;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr mit_enable_sub_;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr mit_disable_sub_;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr mit_zero_sub_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr  arm_send_sub_;
+    std::atomic<bool> send_enabled_{false};
+    std::atomic<bool> poll_enabled_{false};
+    std::array<bool, 7> cmd_seeded_{};
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr arm_poll_sub_;
     rclcpp::executors::SingleThreadedExecutor executor_;
     std::thread executor_thread_;
 };
