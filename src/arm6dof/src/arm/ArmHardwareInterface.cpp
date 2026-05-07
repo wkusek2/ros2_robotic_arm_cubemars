@@ -1,6 +1,8 @@
 #include "ArmHardwareInterface.hpp"
 #include "pluginlib/class_list_macros.hpp"
 #include <cmath>
+#include <chrono>
+#include <thread>
 
 static const int ACTIVE_MOTORS[] = {1, 2, 3, 4, 5, 6, 7};
 static const bool INVERTED[7] = {true, true, true,
@@ -48,12 +50,6 @@ hardware_interface::CallbackReturn ArmHardwareInterface::on_init(const hardware_
             }
         });
 
-    arm_poll_sub_ = node_->create_subscription<std_msgs::msg::Bool>(
-        "arm_poll_enable", 10,
-        [this](const std_msgs::msg::Bool::SharedPtr msg) {
-            poll_enabled_ = msg->data;
-        });
-
     arm_send_sub_ = node_->create_subscription<std_msgs::msg::Bool>(
         "arm_send_enable", 10,
         [this](const std_msgs::msg::Bool::SharedPtr msg) {
@@ -92,6 +88,19 @@ ArmHardwareInterface::~ArmHardwareInterface() {
 }
 
 hardware_interface::CallbackReturn ArmHardwareInterface::on_activate(const rclcpp_lifecycle::State&) {
+    for (int i = 1; i<= 7; i++) {
+        arm_controller_->requestStateAndReceive(i);
+        usleep(50000);
+    }
+    const auto states = arm_controller_->getMITStates();
+    for (int i = 0; i < 7; i++) {
+        if (states[i].valid)
+            position_offsets_[i] = states[i].position;
+    }
+    for (int i = 1; i<= 7; i++) {
+        arm_controller_->requestStateAndReceive(i);
+        usleep(50000);
+    }
     return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -136,19 +145,11 @@ hardware_interface::return_type ArmHardwareInterface::read(const rclcpp::Time&, 
 
 hardware_interface::return_type ArmHardwareInterface::write(const rclcpp::Time&, const rclcpp::Duration&) {
     if (!send_enabled_) {
-        if (poll_enabled_) {
-            for (int motor_id : ACTIVE_MOTORS)
-                arm_controller_->requestStateAndReceive(motor_id);
-        }
         return hardware_interface::return_type::OK;
     }
     for (int motor_id : ACTIVE_MOTORS) {
         int i = motor_id - 1;
-        if (!cmd_seeded_[i]) {
-            if (poll_enabled_)
-                arm_controller_->requestStateAndReceive(motor_id);
-            continue;
-        }
+        if (!cmd_seeded_[i]) continue;
         const auto& mp = MOTOR_PARAMS[i];
         float cmd_pos = static_cast<float>(hw_commands_[i] + position_offsets_[i]) * (INVERTED[i] ? -1.0f : 1.0f);
         arm_controller_->sendMITAndReceive(motor_id, cmd_pos,

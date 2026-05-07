@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <unistd.h>
 
 static uint32_t floatToUint(float x, float xmin, float xmax, int bits) {
     x = std::clamp(x, xmin, xmax);
@@ -85,6 +86,7 @@ void ArmController::mitEnable(int motor_id) {
     if (motor_id == 2) return;
     std::lock_guard<std::mutex> lock(can_mutex_);
     can.sendStd(motor_id, MIT_ENABLE);
+    sleep(100);
 }
 
 void ArmController::mitDisable(int motor_id) {

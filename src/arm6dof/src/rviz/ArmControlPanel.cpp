@@ -21,12 +21,6 @@ ArmControlPanel::ArmControlPanel(QWidget* parent)
     root->addWidget(btn_send_);
     connect(btn_send_, &QPushButton::clicked, this, &ArmControlPanel::toggleSend);
 
-    btn_poll_ = new QPushButton("▶ Start pollowania");
-    btn_poll_->setCheckable(false);
-    btn_poll_->setStyleSheet("QPushButton { background: #8b2020; color: white; font-weight: bold; padding: 6px; }");
-    root->addWidget(btn_poll_);
-    connect(btn_poll_, &QPushButton::clicked, this, &ArmControlPanel::togglePoll);
-
     auto* sep0 = new QFrame(); sep0->setFrameShape(QFrame::HLine); sep0->setFrameShadow(QFrame::Sunken);
     root->addWidget(sep0);
 
@@ -105,7 +99,6 @@ void ArmControlPanel::onInitialize() {
     disable_pub_ = node_->create_publisher<std_msgs::msg::Int32>("mit_disable", 10);
     zero_pub_    = node_->create_publisher<std_msgs::msg::Int32>("mit_zero",    10);
     send_pub_    = node_->create_publisher<std_msgs::msg::Bool>("arm_send_enable", 10);
-    poll_pub_    = node_->create_publisher<std_msgs::msg::Bool>("arm_poll_enable", 10);
 }
 
 void ArmControlPanel::publish(
@@ -129,21 +122,6 @@ void ArmControlPanel::toggleSend() {
     } else {
         btn_send_->setText("▶ Start nadawania");
         btn_send_->setStyleSheet("QPushButton { background: #8b2020; color: white; font-weight: bold; padding: 6px; }");
-    }
-}
-
-void ArmControlPanel::togglePoll() {
-    poll_active_ = !poll_active_;
-    std_msgs::msg::Bool msg;
-    msg.data = poll_active_;
-    if (poll_pub_) poll_pub_->publish(msg);
-
-    if (poll_active_) {
-        btn_poll_->setText("⏸ Stop pollowania");
-        btn_poll_->setStyleSheet("QPushButton { background: #2d6a2d; color: white; font-weight: bold; padding: 6px; }");
-    } else {
-        btn_poll_->setText("▶ Start pollowania");
-        btn_poll_->setStyleSheet("QPushButton { background: #8b2020; color: white; font-weight: bold; padding: 6px; }");
     }
 }
 

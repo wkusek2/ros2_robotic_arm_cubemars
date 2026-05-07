@@ -9,6 +9,7 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <chrono>
 
 class ArmHardwareInterface : public hardware_interface::SystemInterface {
     public:
@@ -35,9 +36,7 @@ class ArmHardwareInterface : public hardware_interface::SystemInterface {
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr mit_zero_sub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr  arm_send_sub_;
     std::atomic<bool> send_enabled_{false};
-    std::atomic<bool> poll_enabled_{false};
     std::array<bool, 7> cmd_seeded_{};
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr arm_poll_sub_;
     rclcpp::executors::SingleThreadedExecutor executor_;
     std::thread executor_thread_;
 };
