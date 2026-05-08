@@ -18,6 +18,7 @@ hardware_interface::CallbackReturn ArmHardwareInterface::on_init(const hardware_
     hw_states_velocity_.resize(7, 0.0);
     hw_commands_.resize(7, 0.0);
     hw_commands_velocity_.resize(7, 0.0);
+    position_offsets_.resize(7, 0.0);
 
 
     node_ = std::make_shared<rclcpp::Node>("arm_hardware_interface");
@@ -64,6 +65,8 @@ hardware_interface::CallbackReturn ArmHardwareInterface::on_init(const hardware_
                     int i = motor_id - 1;
                     if (states[i].valid) {
                         hw_commands_[i]          = hw_states_position_[i];
+                        RCLCPP_INFO(node_->get_logger(), "Seed motor %d: cmd=%.3f state=%.3f",
+                        motor_id, hw_commands_[i], hw_states_position_[i]);
                         hw_commands_velocity_[i] = 0.0;
                         cmd_seeded_[i]           = true;
                     }
@@ -90,16 +93,21 @@ ArmHardwareInterface::~ArmHardwareInterface() {
 hardware_interface::CallbackReturn ArmHardwareInterface::on_activate(const rclcpp_lifecycle::State&) {
     for (int i = 1; i<= 7; i++) {
         arm_controller_->requestStateAndReceive(i);
-        usleep(50000);
+        usleep(100000);
     }
     const auto states = arm_controller_->getMITStates();
+    for (int i = 0; i < 7; i++) {
+      RCLCPP_INFO(node_->get_logger(), "Motor %d: valid=%d pos=%.3f", 
+                   i+1, states[i].valid, states[i].position);
+    }   
+
     for (int i = 0; i < 7; i++) {
         if (states[i].valid)
             position_offsets_[i] = states[i].position;
     }
     for (int i = 1; i<= 7; i++) {
         arm_controller_->requestStateAndReceive(i);
-        usleep(50000);
+        usleep(100000);
     }
     return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -151,7 +159,8 @@ hardware_interface::return_type ArmHardwareInterface::write(const rclcpp::Time&,
         int i = motor_id - 1;
         if (!cmd_seeded_[i]) continue;
         const auto& mp = MOTOR_PARAMS[i];
-        float cmd_pos = static_cast<float>(hw_commands_[i] + position_offsets_[i]) * (INVERTED[i] ? -1.0f : 1.0f);
+        float cmd_pos = static_cast<float>(hw_commands_[i]) * (INVERTED[i] ? -1.0f : 1.0f) 
+                + static_cast<float>(position_offsets_[i]);
         arm_controller_->sendMITAndReceive(motor_id, cmd_pos,
                                           static_cast<float>(hw_commands_velocity_[i]), mp.kp_cmd, mp.kd_cmd, 0.0f);
     }

@@ -162,6 +162,9 @@ void ArmController::sendMIT(int motor_id, float p, float v, float kp, float kd, 
 bool ArmController::requestStateAndReceive(int motor_id) {
     if (motor_id == 2) {
         // AK60-39: zero-gain MIT command → no force applied, motor replies with state
+        sendMITAndReceive(2, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        usleep(100000);
+        
         return sendMITAndReceive(2, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     }
     // Standard motors: MIT enable frame (FF..FC) → motor replies with current state
